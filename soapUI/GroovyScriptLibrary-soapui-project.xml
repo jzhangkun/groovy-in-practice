@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="3cd867df-c795-4ea9-a690-58824a3d1432" activeEnvironment="Default" name="GroovyScriptLibrary" resourceRoot="" soapui-version="5.3.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:testSuite id="cfdc792d-e003-43cd-884b-d804635e161b" name="Script Library"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="a2d2e429-a47b-4096-8872-4f2109f624b2" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Core" searchProperties="true"><con:settings/><con:testStep type="groovy" name="executeExternalScript" id="9af25ec4-374e-4683-90bb-5b1b66c29f2d"><con:settings/><con:config><script>import groovy.lang.Binding
+import groovy.util.GroovyScriptEngine
+ 
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils( context )
+
+log.info(groovyUtils)
+
+//log.info(groovyUtils.getProjectPath)
+
+// define location of script file relative to project file.
+String projectPath = groovyUtils.getProjectPath() + "/groovy/";
+log.info(orojectPath);
+
+// Create Groovy Script Engine to run Script.
+GroovyScriptEngine gse = new GroovyScriptEngine(projectPath) 
+ e
+// Load the Groovy Script file 
+externalScript = gse.loadScriptByName("Utility.groovy")  
+ 
+// Create a runtime instance of script
+instance = externalScript.newInstance()
+ 
+// Sanity check 
+assert instance!= null
+ 
+// run a method in external script
+instance.foo()</script></con:config></con:testStep><con:testStep type="groovy" name="executeTestStep" id="baa96f80-c92d-40eb-bf04-ae07799994f8"><con:settings/><con:config><script>import groovy.json.JsonSlurper
+
+context.setProperty("helloWorld", new helloWorld());
+context.setProperty("configItem", new ConfigItem(log, context, testRunner));
+
+class helloWorld{
+    def sayHello(name)
+    {
+        return "Hello " + name + "!";
+    }
+}
+
+class ConfigItem {
+	def log;
+	def context;
+	def testRunner;
+
+	def ConfigItem(log, context, testRunner) {
+		this.log = log;
+		this.context = context;
+		this.testRunner = testRunner;
+	}
+	
+	def jsonSlurper = new JsonSlurper();
+	def result;
+
+	def parse(response) {
+		result = jsonSlurper.parseText(response);
+		log.info(result);
+	}
+
+	def expect(attr, expected) {
+		log.info(result."${attr}");
+		assert(result."${attr}" == expected);
+	}
+
+	def expectFirstName(expected) {
+		assert(result.fname == expected);
+	}
+}
+
+def ci = context.configItem;
+ci.parse("{\"fname\":\"zhang\", \"lname\": \"kun\"}");
+
+ci.expect("fname", "zhang");
+ci.expectFirstName("zhang");
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="initConfigItem" id="bde72b39-8aa4-4a6f-a374-9d09b4104544"><con:settings/><con:config><script>import groovy.json.JsonSlurper;
+context.setProperty("configItem", new ConfigItem(log, context, testRunner));
+
+class ConfigItem {
+    def log;
+    def context;
+    def testRunner;
+
+    ConfigItem(log, context, testRunner) {
+        this.log = log;
+        this.context = context;
+        this.testRunner = testRunner;
+    }
+    
+    def jsonSlurper = new JsonSlurper();
+    def result;
+
+    def parse(response) {
+        result = jsonSlurper.parseText(response);
+    }
+
+    def expect(attr, expected) {
+        assert(result."${attr}" == expected);
+    }
+
+    def expectFirstName(expected) {
+        assert(result.fname == expected);
+    }
+
+    def expectLastName(expected) {
+        assert(result.lname == expected);
+    }
+    
+    static void main(args) {
+        ConfigItem ci = new ConfigItem("a", "b", "c");
+        ci.parse("{\"fname\":\"zhang\", \"lname\": \"kun\"}");
+        ci.expect("fname", "zhang");
+        println("completed");
+    }
+}
+</script></con:config></con:testStep><con:testStep type="groovy" name="executeConfigItem" id="af87df9d-ffd1-48ed-9a7c-7f080fb7e545"><con:settings/><con:config><script>scripts = testRunner.testCase.testSuite.project.testSuites["Script Library"];
+scripts.testCases["Core"].testSteps["initConfigItem"].run(testRunner, context);
+
+def ci = context.configItem;
+ci.parse('{\"fname\":\"kun\", \"lname\": \"zhang\"}');
+ci.expect("fname", "kun");
+ci.expectLastName("zhang");
+log.info(ci.result);
+
+</script></con:config></con:testStep><con:testStep type="groovy" name="iternateTestSteps" id="8d3c2d07-4fd0-4a03-bbac-69412a9fb09b"><con:settings/><con:config><script>def project = context.testCase.testSuite.project
+def testSuiteList = project.getTestSuiteList()
+
+testSuiteList.each
+ {
+ if (!it.isDisabled())
+  {
+  def testSuite = it
+
+  if (testSuite.name.contains("(TARGET)"))
+   {
+   def testCaseList = testSuite.getTestCaseList()
+
+   testCaseList.each
+    {
+    if (!it.isDisabled())
+     {
+     def testCase = it
+
+     def testStepList = testCase.getTestStepList()
+
+     testStepList.each
+      {
+      if (!it.isDisabled())
+       {
+       def testStep = it
+
+       if (testStep instanceof  com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep)
+        {
+        if( testStep.getAssertionCount() != 5)
+         {
+         log.info(testSuite.name+"."+testCase.name+"."+testStep.name+"="+ testStep.getAssertionCount())
+
+         def assertionList = testStep.getAssertionList()
+
+         assertionList.each
+          {
+          def assertion = it
+          log.info(testSuite.name+"."+testCase.name+"."+testStep.name+"."+assertion.name)
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }</script></con:config></con:testStep><con:properties/></con:testCase><con:testCase id="fcb40adc-54da-4068-91f3-62b5f5632274" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Demo" searchProperties="true"><con:settings/><con:testStep type="groovy" name="HelloWorld" id="92b09897-c1b4-4c04-8780-17a8fc5b8fa1"><con:settings/><con:config><script>context.setProperty("helloWorld", new helloWorld());
+
+class helloWorld{
+    def sayHello(name)
+    {
+        return "Hello " + name + "!";
+    }
+}
+</script></con:config></con:testStep><con:testStep type="groovy" name="Hello" id="ee74a04b-61fa-4894-a190-e1d7f1192651"><con:settings/><con:config><script>
+scripts = testRunner.testCase.testSuite.project.testSuites["Script Library"];
+scripts.testCases["Demo"].testSteps["HelloWorld"].run(testRunner, context);
+
+log.info(context.helloWorld.sayHello("Kerry"));</script></con:config></con:testStep><con:properties/></con:testCase><con:properties/></con:testSuite><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/><con:sensitiveInformation/></con:soapui-project>
