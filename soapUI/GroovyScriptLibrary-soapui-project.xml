@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<con:soapui-project id="3cd867df-c795-4ea9-a690-58824a3d1432" activeEnvironment="Default" name="GroovyScriptLibrary" resourceRoot="" soapui-version="5.3.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:testSuite id="cfdc792d-e003-43cd-884b-d804635e161b" name="Script Library"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="a2d2e429-a47b-4096-8872-4f2109f624b2" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Core" searchProperties="true"><con:settings/><con:testStep type="groovy" name="executeExternalScript" id="9af25ec4-374e-4683-90bb-5b1b66c29f2d"><con:settings/><con:config><script>import groovy.lang.Binding
+<con:soapui-project id="3cd867df-c795-4ea9-a690-58824a3d1432" activeEnvironment="Default" name="GroovyScriptLibrary" resourceRoot="" soapui-version="5.3.0" abortOnError="false" runType="SEQUENTIAL" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:testSuite id="cfdc792d-e003-43cd-884b-d804635e161b" name="Script Library"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="a2d2e429-a47b-4096-8872-4f2109f624b2" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="Core" searchProperties="true"><con:settings/><con:testStep type="groovy" name="executeExternalScript" id="9af25ec4-374e-4683-90bb-5b1b66c29f2d"><con:settings/><con:config><script>/**
+ * Created by jzhangkun on 09/07/2017.
+ */
+import groovy.lang.Binding
 import groovy.util.GroovyScriptEngine
- 
-def groovyUtils = new com.eviware.soapui.support.GroovyUtils( context )
 
-log.info(groovyUtils)
-
-//log.info(groovyUtils.getProjectPath)
+def groovyUtils = new com.eviware.soapui.support.GroovyUtils( context );
 
 // define location of script file relative to project file.
-String projectPath = groovyUtils.getProjectPath() + "/groovy/";
-log.info(orojectPath);
+String projectPath = groovyUtils.getProjectPath()
+log.info(projectPath);
+String newProjectPath = projectPath + "/src/groovy/com/kun"
 
 // Create Groovy Script Engine to run Script.
-GroovyScriptEngine gse = new GroovyScriptEngine(projectPath) 
- e
-// Load the Groovy Script file 
-externalScript = gse.loadScriptByName("Utility.groovy")  
- 
+GroovyScriptEngine gse = new GroovyScriptEngine(newProjectPath)
+
+// Load the Groovy Script file
+externalScript = gse.loadScriptByName("Hello.groovy")
+
 // Create a runtime instance of script
 instance = externalScript.newInstance()
- 
-// Sanity check 
+log.info(instance)
+
+// Sanity check
 assert instance!= null
- 
+
 // run a method in external script
-instance.foo()</script></con:config></con:testStep><con:testStep type="groovy" name="executeTestStep" id="baa96f80-c92d-40eb-bf04-ae07799994f8"><con:settings/><con:config><script>import groovy.json.JsonSlurper
+instance.sayHello("kk")
+</script></con:config></con:testStep><con:testStep type="groovy" name="executeTestStep" id="baa96f80-c92d-40eb-bf04-ae07799994f8"><con:settings/><con:config><script>import groovy.json.JsonSlurper
 
 context.setProperty("helloWorld", new helloWorld());
 context.setProperty("configItem", new ConfigItem(log, context, testRunner));
